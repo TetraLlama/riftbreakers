@@ -1,0 +1,4 @@
+# Full rules text extracted from your PDF. Keep it out of the public repo.
+private/
+*.pdf
+__pycache__/
