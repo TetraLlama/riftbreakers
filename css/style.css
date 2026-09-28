@@ -429,3 +429,10 @@ em, i, [class*=hint], .muted, .faint, .chip, .badge, .rolls, .mode-note, .tag,
 .log-entry time { font-weight: 500; }
 
 .add-form select, .insp-stats select { width: 90px; }
+
+/* Dark ink on bone reads thinner than bone on black: use a heavier weight
+   wherever text sits on a light fill. */
+.card .cost { font-weight: 700; font-size: 20px; }
+.btn.primary, .btn:hover:not(:disabled), .chip.prime, .cond.on, .d12.in-hand .nm, .token.pc .disc {
+  font-weight: 700;
+}
