@@ -7,12 +7,13 @@
 // shows the same layout. A token's zone is derived from its x position.
 
 export const ZONES = 4;
+const ROMAN = ["I", "II", "III", "IV"];
 export const CONDITIONS = [
   "Asleep", "Bleeding", "Blinded", "Burning", "Charmed", "Concealed", "Cursed", "Dazed",
   "Engaged", "Frightened", "Freezing", "Paralyzed", "Poisoned", "Prone", "Restrained", "Stunned",
 ];
-const ENEMY_COLOR = "#ef4444";
-const ALLY_COLOR = "#a3e635";
+const ENEMY_COLOR = "#c0201b";
+const ALLY_COLOR = "#8d877c";
 
 export const zoneOf = (x) => Math.min(ZONES, Math.max(1, Math.floor(x * ZONES) + 1));
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -55,7 +56,7 @@ export function createBoard(api) {
       <div class="field" data-b="field">
         ${Array.from({ length: ZONES }, (_, i) => `
           <div class="zone z${i + 1}">
-            <div class="zone-label"><b><span class="zw">Zone </span>${i + 1}</b><span class="zone-sub">${i === 0 ? "party start" : i === ZONES - 1 ? "enemy start" : ""}</span><span class="zone-range"></span></div>
+            <div class="zone-label"><b><span class="zw">Zone </span>${ROMAN[i]}</b><span class="zone-sub">${i === 0 ? "party start" : i === ZONES - 1 ? "enemy start" : ""}</span><span class="zone-range"></span></div>
           </div>`).join("")}
       </div>
       <div class="inspector hidden" data-b="inspector"></div>
@@ -114,7 +115,7 @@ export function createBoard(api) {
     const html = `
       <span class="disc">${down ? "☠" : esc(initials(t.label))}</span>
       <span class="tlabel">${esc(t.label)}</span>
-      ${hasHp ? `<span class="hpbar"><span style="width:${pct * 100}%;background:${pct > .5 ? "#4ade80" : pct > .25 ? "#facc15" : "#f87171"}"></span></span>` : ""}
+      ${hasHp ? `<span class="hpbar"><span style="width:${pct * 100}%;background:${pct > .5 ? "#e9e4d8" : pct > .25 ? "#8d877c" : "#c0201b"}"></span></span>` : ""}
       ${t.conds?.length ? `<span class="cdots" title="${esc(t.conds.join(", "))}">${t.conds.slice(0, 4).map(() => "<i></i>").join("")}</span>` : ""}`;
     if (node._html !== html) { node.innerHTML = html; node._html = html; }
   }
@@ -142,7 +143,7 @@ export function createBoard(api) {
         <span class="dot" style="background:${esc(t.color)}"></span>
         <input class="insp-name" value="${esc(t.label)}" data-f="label" maxlength="30" aria-label="Token name">
         <span class="chip">${t.kind === "pc" ? "Player" : t.kind === "enemy" ? "Enemy" : "Ally"}</span>
-        <span class="chip">Zone ${zoneOf(t.x)}</span>
+        <span class="chip">Zone ${ROMAN[zoneOf(t.x) - 1]}</span>
         <span class="spacer"></span>
         <button class="btn sm ghost" data-b="close" aria-label="Close">✕</button>
       </div>

@@ -101,7 +101,7 @@ async function startCombat() {
   if (!me().length && !state.chars.length) return toast("Add a character first.");
   const combatId = "k" + Date.now().toString(36);
   if (state.room?.combatId) return;
-  await state.store.addLog(state.code, [{ text: "⚔ Combat begins. Round 1.", color: "#fb923c" }]);
+  await state.store.addLog(state.code, [{ text: "⚔ Combat begins. Round 1.", color: "#c0201b" }]);
   await state.store.updateRoom(state.code, (r) => (r.combatId ? null : { combatId, round: 1 }));
 }
 async function nextRound() {
@@ -111,7 +111,7 @@ async function nextRound() {
 async function endCombat() {
   if (!confirm("End combat for everyone? Hands clear and Primes reset.")) return;
   await state.store.updateRoom(state.code, (r) => (r.combatId ? { combatId: null, round: 0 } : null));
-  await state.store.addLog(state.code, [{ text: "Combat ends.", color: "#fb923c" }]);
+  await state.store.addLog(state.code, [{ text: "Combat ends.", color: "#c0201b" }]);
 }
 
 /* ---------------- battlefield ---------------- */
@@ -172,7 +172,7 @@ function lobbyView() {
   return `
   <div class="lobby">
     <h1>Rift Table</h1>
-    <p class="tag">Shared combat tracker for Riftbreakers 2e: Loadouts, hands and Aether.</p>
+    <p class="tag">A shared table for Riftbreakers 2e: Loadouts, hands, Aether, and the dark between the zones.</p>
     <form data-form="join">
       <input name="code" placeholder="Room code" maxlength="24" autocomplete="off" aria-label="Room code">
       <button class="btn primary">Enter</button>
