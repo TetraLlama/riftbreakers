@@ -44,6 +44,14 @@ four zones, with the party starting in Zone 1 and enemies in Zone 4.
   show ☠, and **Clear defeated** removes them.
 - The **Battlefield** heading collapses the board.
 
+### Rules reference
+
+The **Rules** button (and *How combat works* in the lobby) opens **The Order of
+Battle**, a visual flowchart of a full combat, checked against the core book:
+surprise and initiative, your turn (draw, actions, attack checks, crits and
+fumbles), the monster's turn (targeting, movement, Action tables), damage
+resolution with damage types, and what happens at 0 Health and after the fight.
+
 ### Rules the app handles (core book p.14–15, 68–78)
 
 | Rule | What the app does |
@@ -144,6 +152,7 @@ css/style.css           styles
 js/app.js               UI, events, round processing
 js/engine.js            the combat rules (pure functions)
 js/board.js             the shared battlefield (zones + tokens)
+js/rules.js             the combat flow reference sheet
 js/store.js             storage: Firebase (online) or localStorage (local)
 js/config.js            your Firebase config goes here
 js/abilities.js         ability stats (generated)

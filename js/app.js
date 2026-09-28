@@ -2,6 +2,7 @@ import { createStore } from "./store.js";
 import { ABILITIES } from "./abilities.js";
 import * as E from "./engine.js";
 import { createBoard, zoneOf } from "./board.js";
+import { rulesHTML } from "./rules.js";
 
 const HEART_COLORS = {
   Arcane: "#a78bfa", Arrow: "#86efac", Bastion: "#94a3b8", Blade: "#f87171", Death: "#6ee7b7",
@@ -19,6 +20,7 @@ const state = {
   unsub: [],
   tokens: [], tokensLoaded: false, charsLoaded: false,
   board: null,
+  showRules: false,
 };
 const processing = new Set();
 const dealt = new Set(); // cards already animated in, so re-renders don't replay the deal
@@ -151,6 +153,22 @@ async function syncPcTokens() {
   }
 }
 
+/* ---------------- rules reference ---------------- */
+// Lives outside #app so live re-renders never reset its scroll position.
+function setRules(open) {
+  state.showRules = open;
+  document.documentElement.classList.toggle("no-scroll", open);
+  let root = document.getElementById("rules-root");
+  if (!open) { root?.remove(); return; }
+  if (!root) {
+    root = document.createElement("div");
+    root.id = "rules-root";
+    root.innerHTML = rulesHTML();
+    document.body.appendChild(root);
+  }
+  root.querySelector(".rules-sheet")?.focus();
+}
+
 /* ---------------- rendering ---------------- */
 let renderQueued = false;
 function render() {
@@ -166,6 +184,9 @@ function render() {
   if (slot && state.board) slot.replaceWith(state.board.el);
 }
 document.addEventListener("focusout", () => setTimeout(() => renderQueued && render(), 0));
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && state.showRules) setRules(false);
+});
 
 function lobbyView() {
   const recent = JSON.parse(localStorage.getItem("rbc:recent") || "[]");
@@ -179,6 +200,7 @@ function lobbyView() {
     </form>
     <p class="small faint" style="margin-top:10px">Pick any code and share it with your party. Same code, same room.</p>
     <button class="btn ghost sm" data-act="random-room">Make me a code</button>
+    <button class="btn ghost sm" data-act="rules">How combat works</button>
     ${recent.length ? `<div class="recent">${recent.map((r) => `<button class="btn sm" data-act="open-room" data-code="${esc(r)}">${esc(r)}</button>`).join("")}</div>` : ""}
     <p class="mode-note">${state.mode === "online" ? "Online: rooms are shared live with anyone who has the code." : "Local mode: rooms live in this browser only. Add a Firebase config to play online (see README)."}</p>
   </div>`;
@@ -199,6 +221,7 @@ function roomView() {
          <button class="btn danger sm" data-act="end-combat">End combat</button>`
       : `<span class="round-pill">No combat</span>
          <button class="btn gold" data-act="start-combat">Start combat ⚔</button>`}
+    <button class="btn sm" data-act="rules" title="Combat flow reference">Rules</button>
     <button class="btn ghost sm" data-act="leave">Leave</button>
   </header>
   <div id="board-slot"></div>
@@ -448,6 +471,12 @@ document.addEventListener("click", async (e) => {
         return openRoom(`${words[Math.floor(Math.random() * words.length)]}-${Math.floor(1000 + Math.random() * 9000)}`);
       }
       case "open-room": return openRoom(el.dataset.code);
+      case "rules": return setRules(true);
+      case "close-rules":
+        // The backdrop shares this action; ignore clicks that land inside the sheet.
+        if (el.classList.contains("rules-overlay") && e.target !== el) return;
+        return setRules(false);
+      case "rules-jump": document.getElementById(el.dataset.to)?.scrollIntoView({ behavior: "smooth", block: "start" }); return;
       case "leave": location.hash = ""; return;
       case "copy-link":
         await navigator.clipboard?.writeText(location.href).catch(() => {});
