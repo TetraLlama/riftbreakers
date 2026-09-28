@@ -425,3 +425,5 @@ em, i, [class*=hint], .muted, .faint, .chip, .badge, .rolls, .mode-note, .tag,
 .zone-label { font-size: 14px; }
 .token .tlabel { font-weight: 600; }
 .log-entry time { font-weight: 500; }
+
+.add-form select, .insp-stats select { width: 90px; }

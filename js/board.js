@@ -12,6 +12,13 @@ export const CONDITIONS = [
   "Asleep", "Bleeding", "Blinded", "Burning", "Charmed", "Concealed", "Cursed", "Dazed",
   "Engaged", "Frightened", "Freezing", "Paralyzed", "Poisoned", "Prone", "Restrained", "Stunned",
 ];
+// Protection values used in the bestiary: flat reductions or a die rolled per hit.
+const PROTECTION = ["1", "2", "3", "4", "5", "6", "D3", "D4", "D6", "D8", "D10", "D12", "D4+1", "D6+1"];
+const PROT_TIP = "Protection (armor): subtract it from the damage of each hit. If it's a die, roll it every hit.";
+const protOptions = (cur = "") => {
+  const list = cur && !PROTECTION.includes(cur) ? [cur, ...PROTECTION] : PROTECTION;
+  return `<option value="">None</option>` + list.map((v) => `<option ${v === cur ? "selected" : ""}>${esc(v)}</option>`).join("");
+};
 const ENEMY_COLOR = "#c0201b";
 const ALLY_COLOR = "#8d877c";
 
@@ -46,8 +53,8 @@ export function createBoard(api) {
       <form class="add-form hidden" data-b="form">
         <input name="label" placeholder="Name (e.g. Goblin)" maxlength="30" required aria-label="Name">
         <label>×<input name="count" type="number" min="1" max="12" value="1" aria-label="How many"></label>
-        <label>HP<input name="hp" type="number" min="0" max="999" placeholder="—" aria-label="Health"></label>
-        <label>Prot<input name="prot" placeholder="D8" maxlength="8" aria-label="Protection"></label>
+        <label>Health<input name="hp" type="number" min="0" max="999" placeholder="—"></label>
+        <label title="${PROT_TIP}">Protection<select name="prot">${protOptions()}</select></label>
         <label>Parry<input name="parry" type="number" min="0" max="100" placeholder="0" aria-label="Parry"></label>
         <label>Evasion<input name="evasion" type="number" min="0" max="100" placeholder="0" aria-label="Evasion"></label>
         <button class="btn primary sm">Add</button>
@@ -159,7 +166,7 @@ export function createBoard(api) {
           <label class="small muted">Max Health <input type="number" min="0" max="999" value="${hasHp ? t.hpMax : ""}" data-f="hpMax" style="width:70px"></label>
         </div>
         <div class="insp-stats">
-          <label>Protection<input value="${esc(t.prot ?? "")}" data-f="prot" maxlength="8"></label>
+          <label title="${PROT_TIP}">Protection<select data-f="prot">${protOptions(t.prot || "")}</select></label>
           <label>Parry<input type="number" value="${esc(t.parry ?? "")}" data-f="parry"></label>
           <label>Evasion<input type="number" value="${esc(t.evasion ?? "")}" data-f="evasion"></label>
         </div>
