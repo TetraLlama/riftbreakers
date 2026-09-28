@@ -193,7 +193,7 @@ function roomView() {
     <span class="room-code" data-act="copy-link" title="Copy invite link">${esc(state.code)}</span>
     <span class="badge ${state.mode === "online" ? "online" : ""}">${state.mode === "online" ? "● online" : "local"}</span>
     <span class="spacer"></span>
-    ${r.combatId
+    ${!state.room ? "" : r.combatId
       ? `<span class="round-pill live">Round ${r.round}</span>
          <button class="btn gold" data-act="next-round" title="Everyone refills Aether and draws to a full hand">Next round ⟳</button>
          <button class="btn danger sm" data-act="end-combat">End combat</button>`
@@ -210,7 +210,7 @@ function roomView() {
           ? `<form class="row-flex" data-form="new-char"><input name="name" placeholder="Character name" maxlength="40" autofocus aria-label="Character name"><button class="btn primary sm">Add</button><button type="button" class="btn ghost sm" data-act="cancel-char">Cancel</button></form>`
           : `<button class="btn sm" data-act="new-char">+ Character</button>`}
       </div>
-      ${c ? characterView(c) : `<div class="panel"><h3>No character yet</h3><p class="muted">Add a character, fill their 12 Loadout slots, then start combat. Each friend adds their own from their device.</p>${state.addingChar ? "" : `<button class="btn primary" data-act="new-char">+ Add character</button>`}</div>`}
+      ${!state.charsLoaded ? `<div class="panel"><p class="muted" style="margin:0">Gathering the party…</p></div>` : c ? characterView(c) : `<div class="panel"><h3>No character yet</h3><p class="muted">Add a character, fill their 12 Loadout slots, then start combat. Each friend adds their own from their device.</p>${state.addingChar ? "" : `<button class="btn primary" data-act="new-char">+ Add character</button>`}</div>`}
     </section>
     <aside>
       ${partyView()}

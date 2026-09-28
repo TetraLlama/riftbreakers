@@ -294,16 +294,18 @@ label.check { display: inline-flex; gap: 6px; align-items: center; cursor: point
 .add-form input { width: 64px; }
 .add-form input[name=label] { width: auto; flex: 1; min-width: 150px; }
 
-/* Flagstone floor: irregular stone grid, grain, and a lantern pool of light. */
+/* Hex-tiled stone floor: carved dark seams with a faint worn highlight,
+   grain, and a lantern pool of light. Hexes are about token-sized. */
 .field {
+  --hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 90' preserveAspectRatio='none'%3E%3Cpath d='M26 1.5L52 16.5V46.5L26 61.5L0 46.5V16.5Z M26 61.5V91.5' fill='none' stroke='%23e9e4d8' stroke-opacity='.07' stroke-width='1'/%3E%3Cpath d='M26 0L52 15V45L26 60L0 45V15Z M26 60V90' fill='none' stroke='%23000' stroke-opacity='.8' stroke-width='2.4'/%3E%3C/svg%3E");
+  --hex-w: 52px; --hex-h: 90px;
   position: relative; display: grid; grid-template-columns: repeat(4, 1fr);
   height: clamp(240px, 34vw, 360px);
   border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden;
   background:
     radial-gradient(ellipse at 50% 55%, rgba(233, 228, 216, .07), transparent 70%),
     var(--grain),
-    repeating-linear-gradient(0deg, transparent 0 58px, rgba(0, 0, 0, .75) 58px 60px),
-    repeating-linear-gradient(90deg, transparent 0 86px, rgba(0, 0, 0, .6) 86px 88px),
+    var(--hex) 0 0 / var(--hex-w) var(--hex-h),
     linear-gradient(180deg, #1a1918, #121211);
   box-shadow: inset 0 0 0 3px #000, inset 0 0 0 4px var(--line), inset 0 0 80px rgba(0, 0, 0, .9);
   touch-action: none; user-select: none;
@@ -354,7 +356,7 @@ label.check { display: inline-flex; gap: 6px; align-items: center; cursor: point
 .token .cdots { position: absolute; top: -4px; right: -5px; display: flex; gap: 2px; }
 .token .cdots i { width: 8px; height: 8px; transform: rotate(45deg); background: var(--bone); box-shadow: 0 0 0 1.5px #000; }
 @media (max-width: 640px) {
-  .field { height: 300px; }
+  .field { height: 300px; --hex-w: 38px; --hex-h: 66px; }
   .token { --size: 34px; }
   .token .disc { font-size: 13px; }
   .token .tlabel { font-size: 11px; max-width: 72px; }
