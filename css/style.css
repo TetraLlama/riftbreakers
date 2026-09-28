@@ -297,8 +297,8 @@ label.check { display: inline-flex; gap: 6px; align-items: center; cursor: point
 /* Hex-tiled stone floor: carved dark seams with a faint worn highlight,
    grain, and a lantern pool of light. Hexes are about token-sized. */
 .field {
-  --hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 52 90' preserveAspectRatio='none'%3E%3Cpath d='M26 1.5L52 16.5V46.5L26 61.5L0 46.5V16.5Z M26 61.5V91.5' fill='none' stroke='%23e9e4d8' stroke-opacity='.07' stroke-width='1'/%3E%3Cpath d='M26 0L52 15V45L26 60L0 45V15Z M26 60V90' fill='none' stroke='%23000' stroke-opacity='.8' stroke-width='2.4'/%3E%3C/svg%3E");
-  --hex-w: 52px; --hex-h: 90px;
+  --hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 52' preserveAspectRatio='none'%3E%3Cpath d='M15 1.5H45L60 27.5L45 53.5H15L0 27.5Z M60 27.5H90' fill='none' stroke='%23e9e4d8' stroke-opacity='.07' stroke-width='1'/%3E%3Cpath d='M15 0H45L60 26L45 52H15L0 26Z M60 26H90' fill='none' stroke='%23000' stroke-opacity='.8' stroke-width='2.4'/%3E%3C/svg%3E");
+  --hex-w: 99px; --hex-h: 57.2px; /* r=33px: ~66px corner to corner */
   position: relative; display: grid; grid-template-columns: repeat(4, 1fr);
   height: clamp(240px, 34vw, 360px);
   border: 1px solid var(--line-2); border-radius: var(--radius); overflow: hidden;
@@ -356,7 +356,7 @@ label.check { display: inline-flex; gap: 6px; align-items: center; cursor: point
 .token .cdots { position: absolute; top: -4px; right: -5px; display: flex; gap: 2px; }
 .token .cdots i { width: 8px; height: 8px; transform: rotate(45deg); background: var(--bone); box-shadow: 0 0 0 1.5px #000; }
 @media (max-width: 640px) {
-  .field { height: 300px; --hex-w: 38px; --hex-h: 66px; }
+  .field { height: 300px; --hex-w: 75px; --hex-h: 43.3px; }
   .token { --size: 34px; }
   .token .disc { font-size: 13px; }
   .token .tlabel { font-size: 11px; max-width: 72px; }
