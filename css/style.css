@@ -412,7 +412,7 @@ label.check { display: inline-flex; gap: 6px; align-items: center; cursor: point
 /* Legibility: thicken the thin old-print display face a touch, and give
    italics (the thinnest style) a heavier weight and a hair more size. */
 h1, h2, h3, .card .name, .view-tab, .char-tab, .board-toggle, .zone-label b,
-.party-member .nm, .lib-item .row b, .slot-row .n, .chip.prime {
+.party-member .nm, .lib-item .row b, .slot-row .n {
   -webkit-text-stroke: .35px currentColor;
   text-shadow: 0 0 1px rgba(0, 0, 0, .9);
 }
@@ -433,6 +433,13 @@ em, i, [class*=hint], .muted, .faint, .chip, .badge, .rolls, .mode-note, .tag,
 /* Dark ink on bone reads thinner than bone on black: use a heavier weight
    wherever text sits on a light fill. */
 .card .cost { font-weight: 700; font-size: 20px; }
-.btn.primary, .btn:hover:not(:disabled), .chip.prime, .cond.on, .d12.in-hand .nm, .token.pc .disc {
+.btn.primary, .btn:hover:not(:disabled), .cond.on, .d12.in-hand .nm, .token.pc .disc {
   font-weight: 700;
+}
+
+/* Prime tag: crisp small-caps Garamond (IM Fell has no bold, so it smeared). */
+.chip.prime {
+  font-family: var(--ui); font-variant-caps: small-caps; font-weight: 600;
+  font-size: 14px; letter-spacing: .06em; line-height: 1.35; padding: 0 7px;
+  -webkit-text-stroke: 0; text-shadow: none;
 }
