@@ -12,6 +12,10 @@
 //   await store.deleteCharacter(code, id)
 //   await store.addLog(code, entries)    entries: [{text, color}]
 //   await store.saveLibrary(code, lib)
+//   store.watchTokens(code, cb)          -> unsubscribe   cb([{id, ...token}])
+//   await store.saveToken(code, id, token)   full write (create or replace)
+//   await store.updateToken(code, id, patch) merge into an existing token
+//   await store.deleteToken(code, id)
 import { FIREBASE_CONFIG } from "./config.js";
 
 const LOG_LIMIT = 60;
@@ -108,6 +112,26 @@ class LocalStore {
     d.library = lib;
     this.write(code, d);
   }
+
+  watchTokens(code, cb) {
+    return this.watch(() => cb(Object.entries(this.read(code)?.tokens || {}).map(([id, t]) => ({ id, ...t }))));
+  }
+  async saveToken(code, id, token) {
+    const d = this.read(code);
+    d.tokens = { ...(d.tokens || {}), [id]: token };
+    this.write(code, d);
+  }
+  async updateToken(code, id, patch) {
+    const d = this.read(code);
+    if (!d.tokens?.[id]) return;
+    d.tokens[id] = { ...d.tokens[id], ...patch };
+    this.write(code, d);
+  }
+  async deleteToken(code, id) {
+    const d = this.read(code);
+    if (d.tokens) delete d.tokens[id];
+    this.write(code, d);
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -191,5 +215,20 @@ class FirebaseStore {
   }
   async saveLibrary(code, lib) {
     await this.fs.setDoc(this.fs.doc(this.db, "rooms", code, "meta", "library"), lib);
+  }
+
+  watchTokens(code, cb) {
+    return this.fs.onSnapshot(this.col(code, "tokens"),
+      (s) => cb(s.docs.map((d) => ({ id: d.id, ...d.data() }))), (e) => console.error(e));
+  }
+  async saveToken(code, id, token) {
+    const { id: _drop, ...body } = token;
+    await this.fs.setDoc(this.fs.doc(this.db, "rooms", code, "tokens", id), body);
+  }
+  async updateToken(code, id, patch) {
+    await this.fs.updateDoc(this.fs.doc(this.db, "rooms", code, "tokens", id), patch);
+  }
+  async deleteToken(code, id) {
+    await this.fs.deleteDoc(this.fs.doc(this.db, "rooms", code, "tokens", id));
   }
 }

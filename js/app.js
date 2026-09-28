@@ -1,6 +1,7 @@
 import { createStore } from "./store.js";
 import { ABILITIES } from "./abilities.js";
 import * as E from "./engine.js";
+import { createBoard, zoneOf } from "./board.js";
 
 const HEART_COLORS = {
   Arcane: "#a78bfa", Arrow: "#86efac", Bastion: "#94a3b8", Blade: "#f87171", Death: "#6ee7b7",
@@ -16,6 +17,8 @@ const state = {
   view: "combat",
   libFilter: "", libSource: "",
   unsub: [],
+  tokens: [], tokensLoaded: false, charsLoaded: false,
+  board: null,
 };
 const processing = new Set();
 const dealt = new Set(); // cards already animated in, so re-renders don't replay the deal
@@ -111,15 +114,56 @@ async function endCombat() {
   await state.store.addLog(state.code, [{ text: "Combat ends.", color: "#fb923c" }]);
 }
 
+/* ---------------- battlefield ---------------- */
+const pcTokenId = (charId) => "pc-" + charId;
+
+function makeBoard(code) {
+  return createBoard({
+    save: (id, t) => state.store.saveToken(code, id, t),
+    update: (id, patch) => state.store.updateToken(code, id, patch).catch((e) => console.error(e)),
+    remove: (id) => state.store.deleteToken(code, id),
+    log: (text, color) => state.store.addLog(code, [{ text, color }]),
+    onBusyEnd: () => { if (renderQueued) render(); },
+  });
+}
+
+// Every character gets a token, created and kept in sync by its owner.
+async function syncPcTokens() {
+  if (!state.tokensLoaded || !state.charsLoaded) return;
+  const mine = me();
+  for (let i = 0; i < mine.length; i++) {
+    const c = mine[i];
+    const id = pcTokenId(c.id);
+    const tok = state.tokens.find((t) => t.id === id);
+    const key = `tok:${id}:${c.name}:${c.color}`;
+    if (processing.has(key)) continue;
+    if (!tok) {
+      processing.add(key);
+      await state.store.saveToken(state.code, id, {
+        kind: "pc", charId: c.id, owner: c.owner, label: c.name, color: c.color,
+        x: 0.07 + (i % 2) * 0.1, y: 0.22 + ((state.chars.indexOf(c) * 0.19) % 0.7),
+        hpMax: null, hp: null, prot: "", parry: null, evasion: null, conds: [], note: "", createdAt: Date.now(),
+      });
+    } else if (tok.label !== c.name || tok.color !== c.color) {
+      processing.add(key);
+      await state.store.updateToken(state.code, id, { label: c.name, color: c.color });
+    }
+  }
+}
+
 /* ---------------- rendering ---------------- */
 let renderQueued = false;
 function render() {
   // Don't blow away a field the user is typing in; render when they leave it.
   const ae = document.activeElement;
   if (ae && ae.closest("#app") && ae.matches("input, textarea, select")) { renderQueued = true; return; }
+  if (state.board?.isBusy()) { renderQueued = true; return; } // mid-drag
   renderQueued = false;
   const app = $("#app");
   app.innerHTML = state.code ? roomView() : lobbyView();
+  // The battlefield is a persistent element; re-attach it rather than rebuild it.
+  const slot = $("#board-slot");
+  if (slot && state.board) slot.replaceWith(state.board.el);
 }
 document.addEventListener("focusout", () => setTimeout(() => renderQueued && render(), 0));
 
@@ -157,6 +201,7 @@ function roomView() {
          <button class="btn gold" data-act="start-combat">Start combat ⚔</button>`}
     <button class="btn ghost sm" data-act="leave">Leave</button>
   </header>
+  <div id="board-slot"></div>
   <main class="layout">
     <section>
       <div class="char-tabs">
@@ -196,7 +241,7 @@ function combatView(c) {
   const cb = c.combat || E.emptyCombat();
   if (!inCombat()) {
     return `
-    <div class="banner info">Not in combat. When someone presses <b>Start combat</b>, every character refills to ${E.roundMax(c)} Aether and rolls a hand of ${c.handSize || 5}.</div>
+    <div class="banner info"><span>Not in combat. When someone presses <b>Start combat</b>, every character refills to ${E.roundMax(c)} Aether and rolls a hand of ${c.handSize || 5}.</span></div>
     ${loadoutGrid(c)}
     <div class="row-flex" style="margin-top:14px"><button class="btn gold" data-act="start-combat">Start combat ⚔</button><button class="btn" data-act="view" data-view="loadout">Edit Loadout</button></div>`;
   }
@@ -316,7 +361,7 @@ function loadoutView(c) {
     </div>`).join("");
 
   return `
-  ${inCombat() ? `<div class="banner">You're in combat. By the rules, a Loadout can only be changed out of combat (once per 24h, 10 minutes of concentration). Edits apply right away.</div>` : ""}
+  ${inCombat() ? `<div class="banner"><span>You're in combat. By the rules, a Loadout can only be changed out of combat (once per 24h, 10 minutes of concentration). Edits apply right away.</span></div>` : ""}
   <div class="settings-grid">
     <label>Character name<input value="${esc(c.name)}" data-edit="char-name"></label>
     <label>Max Aether<input type="number" min="1" max="30" value="${c.aetherMax}" data-edit="aetherMax"></label>
@@ -369,10 +414,13 @@ function partyView() {
     const cb = c.combat || E.emptyCombat();
     const mine = c.owner === state.uid;
     const hand = inCombat() ? cb.hand.map((i) => E.effectiveSlot(c, i)?.name).filter(Boolean) : [];
+    const tok = state.tokens.find((t) => t.id === pcTokenId(c.id));
+    const hp = tok?.hpMax > 0 ? `${Number.isFinite(tok.hp) ? tok.hp : tok.hpMax}/${tok.hpMax} HP` : "";
     return `<div class="party-member">
       <div class="row"><span class="dot" style="background:${esc(c.color)}"></span><span class="nm">${esc(c.name)}${mine ? ` <span class="faint small">(you)</span>` : ""}</span>
         ${inCombat() ? `<span class="mini-aether">${E.available(c)}◆</span>` : ""}
         ${mine ? "" : `<button class="btn sm ghost" data-act="take" data-id="${c.id}" title="Control this character from this device">Take</button>`}</div>
+      ${tok ? `<div class="hand-list">Zone ${zoneOf(tok.x)}${hp ? ` · ${hp}` : ""}${tok.conds?.length ? ` · ${tok.conds.map(esc).join(", ")}` : ""}</div>` : ""}
       ${hand.length ? `<div class="hand-list">${hand.map(esc).join(" · ")}</div>` : ""}
       ${cb.spentPrimes?.length ? `<div class="hand-list">Primes spent: ${cb.spentPrimes.map(esc).join(", ")}</div>` : ""}
     </div>`;
@@ -417,7 +465,11 @@ document.addEventListener("click", async (e) => {
         return;
       }
       case "delete-char":
-        if (c && confirm(`Delete ${c.name}? This can't be undone.`)) { await state.store.deleteCharacter(state.code, c.id); state.view = "combat"; }
+        if (c && confirm(`Delete ${c.name}? This can't be undone.`)) {
+          await state.store.deleteCharacter(state.code, c.id);
+          await state.store.deleteToken(state.code, pcTokenId(c.id));
+          state.view = "combat";
+        }
         return;
     }
     if (!c) return;
@@ -572,7 +624,10 @@ async function enterRoomFromHash() {
   const code = decodeURIComponent(location.hash.slice(1)).toUpperCase();
   state.code = code || null;
   state.room = null; state.chars = []; state.log = []; state.library = null;
+  state.tokens = []; state.tokensLoaded = false; state.charsLoaded = false;
+  state.board = null;
   if (!code) return render();
+  state.board = makeBoard(code);
 
   const recent = JSON.parse(localStorage.getItem("rbc:recent") || "[]").filter((r) => r !== code);
   localStorage.setItem("rbc:recent", JSON.stringify([code, ...recent].slice(0, 6)));
@@ -582,7 +637,13 @@ async function enterRoomFromHash() {
   const s = state.store;
   state.unsub.push(
     s.watchRoom(code, (r) => { state.room = r; render(); processRounds(); }),
-    s.watchCharacters(code, (cs) => { state.chars = cs; render(); processRounds(); }),
+    s.watchCharacters(code, (cs) => { state.chars = cs; state.charsLoaded = true; render(); processRounds(); syncPcTokens(); }),
+    s.watchTokens(code, (ts) => {
+      state.tokens = ts; state.tokensLoaded = true;
+      state.board?.update(ts);
+      render(); // party panel shows zone / Health
+      syncPcTokens();
+    }),
     s.watchLog(code, (l) => { state.log = l; render(); }),
     s.watchLibrary(code, (lib) => { state.library = lib; render(); }),
   );

@@ -25,6 +25,25 @@ tabs), which works fine for solo play.
    back up to 5.
 6. **End combat** resets hands, Primes and Companions for everyone.
 
+### Battlefield
+
+A shared board at the top of the room shows the book's Combat Zone Grid:
+four zones, with the party starting in Zone 1 and enemies in Zone 4.
+
+- Every character gets a token automatically. **+ Enemies** adds a named
+  group (e.g. 3× Goblin → Goblin 1, 2, 3) with Health, Protection, Parry and
+  Evasion from the monster's stat block. **+ Ally / NPC** adds friendly
+  tokens.
+- Drag tokens anywhere. Everyone sees them move, and zone changes go to the
+  log.
+- Tap a token to select it. The zone headers then show the **range** to every
+  other zone (0–3), for checking Ability ranges. The panel below lets you
+  deal damage or heal, set max Health, stats and notes, toggle conditions
+  (Prone, Stunned, Bleeding…), or move the token to a zone with one tap.
+- A PC at 0 Health is marked down (D4+1 rounds to be revived). Enemies at 0
+  show ☠, and **Clear defeated** removes them.
+- The **Battlefield** heading collapses the board.
+
 ### Rules the app handles (core book p.14–15, 68–78)
 
 | Rule | What the app does |
@@ -81,7 +100,8 @@ It needs `pdftotext` (included with Git for Windows) or `pip install pypdf`.
 3. **Build → Firestore Database → Create database** → production mode → any
    location.
 4. In Firestore, open the **Rules** tab, paste the contents of
-   `firestore.rules`, and **Publish**.
+   `firestore.rules`, and **Publish**. (If you update the app later and
+   `firestore.rules` changed, paste it again.)
 5. **Project settings (gear) → General → Your apps → Web (`</>`)**. Register
    an app (no hosting) and copy the `firebaseConfig` object.
 6. Paste it into `js/config.js`:
@@ -123,6 +143,7 @@ index.html              page shell
 css/style.css           styles
 js/app.js               UI, events, round processing
 js/engine.js            the combat rules (pure functions)
+js/board.js             the shared battlefield (zones + tokens)
 js/store.js             storage: Firebase (online) or localStorage (local)
 js/config.js            your Firebase config goes here
 js/abilities.js         ability stats (generated)

@@ -11,13 +11,11 @@ service cloud.firestore {
       match /characters/{id} {
         allow read: if request.auth != null;
         allow create: if request.auth != null
-          && request.resource.data.owner == request.auth.uid
-          && request.resource.size() < 200000;
+          && request.resource.data.owner == request.auth.uid;
         // Any party member can update (so "Take" works if someone switches
         // devices), but the doc must keep an owner.
         allow update: if request.auth != null
-          && request.resource.data.owner is string
-          && request.resource.size() < 200000;
+          && request.resource.data.owner is string;
         allow delete: if request.auth != null && resource.data.owner == request.auth.uid;
       }
 
@@ -26,6 +24,14 @@ service cloud.firestore {
         allow create: if request.auth != null
           && request.resource.data.text is string
           && request.resource.data.text.size() < 500;
+      }
+
+      // Battlefield tokens: anyone in the room can add, move and edit them.
+      match /tokens/{id} {
+        allow read, delete: if request.auth != null;
+        allow create, update: if request.auth != null
+          && request.resource.data.x is number
+          && request.resource.data.y is number;
       }
 
       match /meta/{doc} {
