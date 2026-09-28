@@ -5,12 +5,12 @@
   --bg-2: #0e0e0d;
   --panel: #121211;
   --panel-2: #191917;
-  --line: #3a3834;
+  --line: #45423d;
   --line-2: #5b5750;
   --bone: #e9e4d8;
-  --text: #d9d3c5;
-  --muted: #9a948a;
-  --faint: #6b665f;
+  --text: #e6e1d5;
+  --muted: #b8b2a6;
+  --faint: #8a847a;
   --blood: #a3120f;
   --blood-2: #d0302a;
   --aether: #f4f1ea;
@@ -33,7 +33,7 @@ body {
     var(--bg);
   background-attachment: fixed;
   color: var(--text);
-  font: 16.5px/1.45 var(--ui);
+  font: 500 17px/1.45 var(--ui);
   min-height: 100vh;
 }
 /* Vignette over everything, like a lantern's reach. */
@@ -203,7 +203,7 @@ label.check { display: inline-flex; gap: 6px; align-items: center; cursor: point
 .chip.prime { color: #000; background: var(--bone); border-color: var(--bone); font-style: normal; font-family: var(--display); letter-spacing: .05em; }
 .chip.react { color: var(--bone); border-color: var(--bone); font-style: normal; }
 .chip.slot { font-family: var(--display); font-style: normal; }
-.card .text { font-size: 14px; line-height: 1.35; color: #b9b3a6; flex: 1; overflow: auto; max-height: 120px; border-top: 1px solid var(--line); padding-top: 6px; }
+.card .text { font-size: 14px; line-height: 1.35; color: #d2ccbf; flex: 1; overflow: auto; max-height: 120px; border-top: 1px solid var(--line); padding-top: 6px; }
 .card .text:empty { border-top: 0; }
 .card .was { font-size: 13px; color: var(--faint); font-style: italic; }
 .card .actions { display: flex; gap: 6px; margin-top: auto; }
@@ -253,7 +253,7 @@ label.check { display: inline-flex; gap: 6px; align-items: center; cursor: point
 .lib-item:hover { border-color: var(--line-2); }
 .lib-item .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
 .lib-item .row b { font-family: var(--display); font-weight: 400; font-size: 17px; color: var(--bone); }
-.lib-item .text { font-size: 14px; color: #a8a295; }
+.lib-item .text { font-size: 14.5px; color: #cdc7ba; }
 
 /* ---------- sidebar ---------- */
 .party-member { padding: 10px 0; border-bottom: 1px solid #1f1e1c; }
@@ -263,7 +263,7 @@ label.check { display: inline-flex; gap: 6px; align-items: center; cursor: point
 .mini-aether { font-family: var(--display); font-size: 18px; color: var(--aether); }
 .party-member .hand-list { font-size: 14px; color: var(--muted); margin-top: 3px; font-style: italic; }
 .log { max-height: 460px; overflow: auto; font-size: 14.5px; display: flex; flex-direction: column; gap: 6px; }
-.log-entry { border-left: 1px solid var(--line-2); padding: 1px 0 1px 9px; color: #c4beb1; }
+.log-entry { border-left: 1px solid var(--line-2); padding: 1px 0 1px 9px; color: #dbd5c8; }
 .log-entry time { color: var(--faint); font-size: 12px; margin-right: 6px; font-family: var(--display); }
 .log::-webkit-scrollbar, .card .text::-webkit-scrollbar { width: 6px; }
 .log::-webkit-scrollbar-thumb, .card .text::-webkit-scrollbar-thumb { background: var(--line); }
@@ -402,3 +402,22 @@ label.check { display: inline-flex; gap: 6px; align-items: center; cursor: point
 }
 .token .disc { font-size: 18px; letter-spacing: .02em; }
 @media (max-width: 640px) { .token .disc { font-size: 14px; } }
+
+/* Legibility: thicken the thin old-print display face a touch, and give
+   italics (the thinnest style) a heavier weight and a hair more size. */
+h1, h2, h3, .card .name, .view-tab, .char-tab, .board-toggle, .zone-label b,
+.party-member .nm, .lib-item .row b, .slot-row .n, .chip.prime {
+  -webkit-text-stroke: .35px currentColor;
+  text-shadow: 0 0 1px rgba(0, 0, 0, .9);
+}
+.lobby h1 { -webkit-text-stroke: 0; }
+em, i, [class*=hint], .muted, .faint, .chip, .badge, .rolls, .mode-note, .tag,
+.hand-list, .settings-grid label, .insp-stats label, .add-form label, .zone-label,
+.banner.info, .empty-hand, .problems, .cond, input::placeholder, textarea::placeholder {
+  font-weight: 500;
+}
+.small { font-size: 14.5px; }
+.chip { font-size: 13px; }
+.zone-label { font-size: 14px; }
+.token .tlabel { font-weight: 600; }
+.log-entry time { font-weight: 500; }
